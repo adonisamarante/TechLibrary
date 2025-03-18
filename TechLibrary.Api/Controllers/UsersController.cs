@@ -31,7 +31,7 @@ namespace TechLibrary.Api.Controllers
                     Errors = ex.GetErrorMessages(),
                 });
             }
-            catch
+            catch // in case of an unknown error that is not a TechLibraryException
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseErrorMessagesJson
                 {
