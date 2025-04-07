@@ -10,9 +10,16 @@ namespace TechLibrary.Api.UseCases.Books.Filter
         {
             var dbContext = new TechLibraryDbContext();
 
+            var books = dbContext.Books.ToList();
+
             return new ResponseBooksJson
             {
-
+                Books = books.Select(book => new ResponseBookJson
+                {
+                    Id = book.Id,
+                    Title = book.Title,
+                    Author = book.Author
+                }).ToList(),
             };
         }
     }
