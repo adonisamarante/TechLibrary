@@ -12,7 +12,7 @@ namespace TechLibrary.Api.Controllers
     {
         [HttpGet("Filter")]
         [ProducesResponseType(typeof(ResponseBooksJson), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+         //[ProducesResponseType(StatusCodes.Status204NoContent)]
         public IActionResult Filter(int pageNumber, string? title)
         {
             var useCase = new FilterBookUseCase();
@@ -25,10 +25,10 @@ namespace TechLibrary.Api.Controllers
 
             var result = useCase.Execute(request);
 
-            if (result.Books.Count > 0)
+            // if (result.Books.Count > 0)
                 return Ok(result);
 
-            return NoContent();
+            // return NoContent();
         }
     }
 }
