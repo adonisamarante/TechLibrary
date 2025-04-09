@@ -6,21 +6,47 @@ namespace TechLibrary.Api.UseCases.Books.Filter
 {
     public class FilterBookUseCase
     {
+        private const int PAGE_SIZE = 10;
+
         public ResponseBooksJson Execute(RequestFilterBooksJson request)
         {
             var dbContext = new TechLibraryDbContext();
 
-            var books = dbContext.Books.ToList();
+            var skip = (request.PageNumber - 1) * PAGE_SIZE;
 
-            return new ResponseBooksJson
+            var query = dbContext.Books.AsQueryable();
+            if (string.IsNullOrWhiteSpace(request.Title) == false)
             {
-                Books = books.Select(book => new ResponseBookJson
+                query = query.Where(book => book.Title.Contains(request.Title));
+            }
+
+            var books = query
+                .OrderBy(book => book.Title).ThenBy(book => book.Author)
+                .Skip(skip) // skips the first books based on the PageNumber received
+                .Take(PAGE_SIZE) // takes only the amount of books defined by PAGE_SIZE, ignoring the rest of the list
+                .ToList(); // toList should always be the last method in the chain, as it executes the query and returns the result
+
+            var totalCount = 0;
+            if (string.IsNullOrWhiteSpace(request.Title))
+                totalCount = dbContext.Books.Count();
+            else
+                totalCount = dbContext.Books.Count(book => book.Title.Contains(request.Title));
+
+
+                return new ResponseBooksJson
                 {
-                    Id = book.Id,
-                    Title = book.Title,
-                    Author = book.Author
-                }).ToList(),
-            };
+                    Pagination = new ResponsePaginationJson
+                    {
+                        PageNumber = request.PageNumber,
+                        TotalCount = totalCount
+                    },
+                    Books = books.Select(book => new ResponseBookJson
+                    {
+                        Id = book.Id,
+                        Title = book.Title,
+                        Author = book.Author
+                    }).ToList(),
+                };
         }
     }
 }
